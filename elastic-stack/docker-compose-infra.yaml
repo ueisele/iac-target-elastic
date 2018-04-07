@@ -1,0 +1,103 @@
+---
+version: '3.4'
+
+services:
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:${VERSION}
+    restart: unless-stopped
+    hostname: elasticsearch
+    environment:
+      cluster.name: "kafka-elastic"
+      discovery.type: "single-node"
+      bootstrap.memory_lock: "true"
+      ES_JAVA_OPTS: "-Xms16g -Xmx16g"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nproc: 65536
+      nofile:
+        soft: 65536
+        hard: 65536        
+    volumes:
+      - esdata1:/usr/share/elasticsearch/data
+    networks:
+      default:
+        aliases:
+          - elasticsearch.${DOMAIN_NAME}
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:${VERSION}
+    restart: unless-stopped
+    hostname: kibana
+    environment:
+      SERVER_NAME: "kibana.${DOMAIN_NAME}"
+      ELASTICSEARCH_URL: "http://elasticsearch.${DOMAIN_NAME}:9200"
+    networks:
+      default:
+        aliases:
+          - kibana.${DOMAIN_NAME}
+
+  filebeatkafka1:
+    image: docker.elastic.co/beats/filebeat:${VERSION}
+    restart: unless-stopped
+    hostname: filebeatkafka01
+    volumes:
+      - /home/kafka/kafka01/logs/:/opt/kafka/logs
+      - ./config/filebeatkafka/modules.d/:/usr/share/filebeat/modules.d
+      - ./config/filebeatkafka/prospectors.d/:/usr/share/filebeat/prospectors.d
+    networks:
+      default:
+  filebeatkafka2:
+    image: docker.elastic.co/beats/filebeat:${VERSION}
+    restart: unless-stopped
+    hostname: filebeatkafka02
+    volumes:
+      - /home/kafka/kafka02/logs/:/opt/kafka/logs
+      - ./config/filebeatkafka/modules.d/:/usr/share/filebeat/modules.d
+      - ./config/filebeatkafka/prospectors.d/:/usr/share/filebeat/prospectors.d
+    networks:
+      default:
+  filebeatkafka3:
+    image: docker.elastic.co/beats/filebeat:${VERSION}
+    restart: unless-stopped
+    hostname: filebeatkafka03
+    volumes:
+      - /home/kafka/kafka03/logs/:/opt/kafka/logs
+      - ./config/filebeatkafka/modules.d/:/usr/share/filebeat/modules.d
+      - ./config/filebeatkafka/prospectors.d/:/usr/share/filebeat/prospectors.d
+    networks:
+      default:
+  filebeatkafka4:
+    image: docker.elastic.co/beats/filebeat:${VERSION}
+    restart: unless-stopped
+    hostname: filebeatkafka04
+    volumes:
+      - /home/kafka/kafka04/logs/:/opt/kafka/logs
+      - ./config/filebeatkafka/modules.d/:/usr/share/filebeat/modules.d
+      - ./config/filebeatkafka/prospectors.d/:/usr/share/filebeat/prospectors.d
+    networks:
+      default:
+  filebeatkafka5:
+    image: docker.elastic.co/beats/filebeat:${VERSION}
+    restart: unless-stopped
+    hostname: filebeatkafka05
+    volumes:
+      - /home/kafka/kafka05/logs/:/opt/kafka/logs
+      - ./config/filebeatkafka/modules.d/:/usr/share/filebeat/modules.d
+      - ./config/filebeatkafka/prospectors.d/:/usr/share/filebeat/prospectors.d
+    networks:
+      default:
+
+  dns:
+    image: andyshinn/dnsmasq
+    restart: unless-stopped
+    command: -d     
+
+volumes:
+  esdata1:
+    driver: local
+
+networks:
+  default:
+...

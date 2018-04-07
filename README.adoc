@@ -1,0 +1,9 @@
+= Elastic
+
+- https://www.docker.elastic.co/
+
+== Filebeat and Kafka
+
+- https://www.elastic.co/guide/en/beats/filebeat/6.2/running-on-docker.html
+- https://www.elastic.co/guide/en/beats/filebeat/6.2/filebeat-module-kafka.html
+- https://www.elastic.co/blog/monitoring-kafka-with-elastic-stack-1-filebeat
