@@ -7,11 +7,7 @@ source ./docker-compose.sh
 popd > /dev/null
 
 function main () {
-    stop_service "filebeatkafka1"
-    stop_service "filebeatkafka2"
-    stop_service "filebeatkafka3"
-    stop_service "filebeatkafka4"
-    stop_service "filebeatkafka5"
+    stop_service "filebeat1"
 }
 
 function stop_service () {

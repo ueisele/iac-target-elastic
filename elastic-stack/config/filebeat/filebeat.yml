@@ -1,0 +1,41 @@
+filebeat.modules:
+- module: kafka
+  log:
+    enabled: true
+    var.kafka_home: /opt/kafka
+    #var.paths:
+    prospector:
+    - document_type: log
+      scan_frequency: 5s
+      close_removed: true
+      close_inactive: 5m
+
+  requestlog:
+    enabled: true
+    var.kafka_home: /opt/kafka
+    #var.paths:
+    prospector:
+    - document_type: log
+      scan_frequency: 5s
+      close_removed: true
+      close_inactive: 5m      
+
+#name: filebeat
+fields:
+  env: iac-target-elastic
+fields_under_root: true
+
+processors:
+- add_cloud_metadata:
+
+output.elasticsearch:
+  hosts: ['elasticsearch:9200']
+  index: "filebeat-%{[env]}-%{[fileset.module]}-%{[fileset.name]}-%{+yyyy.MM.dd}"
+  template.name: "filebeat"
+  template.path: "filebeat.template.json"
+  template.overwrite: true
+  template.versions.2x.path: "filebeat.template-es2x.json"
+  template.versions.6x.path: "filebeat.template-es6x.json"
+  worker: 2
+  username: elastic
+  password: changeme

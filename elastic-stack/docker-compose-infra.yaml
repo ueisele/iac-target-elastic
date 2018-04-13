@@ -38,54 +38,17 @@ services:
         aliases:
           - kibana.${DOMAIN_NAME}
 
-  filebeatkafka1:
+  filebeat1:
     image: docker.elastic.co/beats/filebeat:${VERSION}
     restart: unless-stopped
-    hostname: filebeatkafka01
+    hostname: filebeat1
     volumes:
-      - /home/kafka/kafka01/logs/:/opt/kafka/logs
-      - ./config/filebeatkafka/modules.d/:/usr/share/filebeat/modules.d
-      - ./config/filebeatkafka/prospectors.d/:/usr/share/filebeat/prospectors.d
-    networks:
-      default:
-  filebeatkafka2:
-    image: docker.elastic.co/beats/filebeat:${VERSION}
-    restart: unless-stopped
-    hostname: filebeatkafka02
-    volumes:
-      - /home/kafka/kafka02/logs/:/opt/kafka/logs
-      - ./config/filebeatkafka/modules.d/:/usr/share/filebeat/modules.d
-      - ./config/filebeatkafka/prospectors.d/:/usr/share/filebeat/prospectors.d
-    networks:
-      default:
-  filebeatkafka3:
-    image: docker.elastic.co/beats/filebeat:${VERSION}
-    restart: unless-stopped
-    hostname: filebeatkafka03
-    volumes:
-      - /home/kafka/kafka03/logs/:/opt/kafka/logs
-      - ./config/filebeatkafka/modules.d/:/usr/share/filebeat/modules.d
-      - ./config/filebeatkafka/prospectors.d/:/usr/share/filebeat/prospectors.d
-    networks:
-      default:
-  filebeatkafka4:
-    image: docker.elastic.co/beats/filebeat:${VERSION}
-    restart: unless-stopped
-    hostname: filebeatkafka04
-    volumes:
-      - /home/kafka/kafka04/logs/:/opt/kafka/logs
-      - ./config/filebeatkafka/modules.d/:/usr/share/filebeat/modules.d
-      - ./config/filebeatkafka/prospectors.d/:/usr/share/filebeat/prospectors.d
-    networks:
-      default:
-  filebeatkafka5:
-    image: docker.elastic.co/beats/filebeat:${VERSION}
-    restart: unless-stopped
-    hostname: filebeatkafka05
-    volumes:
-      - /home/kafka/kafka05/logs/:/opt/kafka/logs
-      - ./config/filebeatkafka/modules.d/:/usr/share/filebeat/modules.d
-      - ./config/filebeatkafka/prospectors.d/:/usr/share/filebeat/prospectors.d
+      - ./../work/kafka:/opt/kafka
+      - ./config/filebeat/module/kafka:/usr/share/filebeat/module/kafka
+      - ./config/filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml
+      - ./config/filebeat/filebeat.template.json:/usr/share/filebeat/filebeat.template.json
+      - ./config/filebeat/filebeat.template-es2x.json:/usr/share/filebeat/filebeat.template-es2x.json
+      - ./config/filebeat/filebeat.template-es6x.json:/usr/share/filebeat/filebeat.template-es6x.json
     networks:
       default:
 

@@ -7,11 +7,7 @@ source ./docker-compose.sh
 popd > /dev/null
 
 function main () {
-    start_service "filebeatkafka1"
-    start_service "filebeatkafka2"
-    start_service "filebeatkafka3"
-    start_service "filebeatkafka4"
-    start_service "filebeatkafka5"
+    start_service "filebeat1"
 }
 
 function start_service () {

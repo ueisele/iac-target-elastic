@@ -7,3 +7,8 @@
 - https://www.elastic.co/guide/en/beats/filebeat/6.2/running-on-docker.html
 - https://www.elastic.co/guide/en/beats/filebeat/6.2/filebeat-module-kafka.html
 - https://www.elastic.co/blog/monitoring-kafka-with-elastic-stack-1-filebeat
+
+== Grok Predefined Patterns
+https://github.com/elastic/elasticsearch/blob/5.5/modules/ingest-common/src/main/resources/patterns/
+https://github.com/kkos/oniguruma/blob/master/doc/RE
+https://www.elastic.co/guide/en/elasticsearch/reference/5.5/grok-processor.html
