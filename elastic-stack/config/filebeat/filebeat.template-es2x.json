@@ -299,7 +299,6 @@
           }
         },
         "error": {
-          "ignore_above": 1024,
           "index": "not_analyzed",
           "type": "string"
         },
@@ -406,6 +405,41 @@
                   "ignore_above": 1024,
                   "index": "not_analyzed",
                   "type": "string"
+                }
+              }
+            },
+            "env": {
+              "properties": {
+                "name": {
+                  "ignore_above": 1024,
+                  "index": "not_analyzed",
+                  "type": "string"
+                }
+              }
+            },
+            "log": {
+              "properties": {
+                "source": {
+                  "properties": {
+                    "name": {
+                      "ignore_above": 1024,
+                      "index": "not_analyzed",
+                      "type": "string"
+                    },
+                    "id": {
+                      "type": "long"
+                    },
+                    "version": {
+                      "ignore_above": 1024,
+                      "index": "not_analyzed",
+                      "type": "string"
+                    },
+                    "hostname": {
+                      "ignore_above": 1024,
+                      "index": "not_analyzed",
+                      "type": "string"
+                    }
+                  }
                 }
               }
             }

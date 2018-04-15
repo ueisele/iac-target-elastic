@@ -9,6 +9,7 @@ var:
       - "{{.kafka_home}}/log/server.log*"
       - "{{.kafka_home}}/log/state-change.log*"
       - "{{.kafka_home}}/log/kafka-*.log*"
+      - "{{.kafka_home}}/requestlog/request.log*"
 
 ingest_pipeline: ingest/pipeline.json
 prospector: config/log.yml

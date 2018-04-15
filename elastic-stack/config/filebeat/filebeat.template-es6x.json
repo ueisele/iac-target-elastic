@@ -250,7 +250,6 @@
           }
         },
         "error": {
-          "ignore_above": 1024,
           "type": "keyword"
         },
         "fileset": {
@@ -336,6 +335,37 @@
                 "region": {
                   "ignore_above": 1024,
                   "type": "keyword"
+                }
+              }
+            },
+            "env": {
+              "properties": {
+                "name": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                }
+              }
+            },
+            "log": {
+              "properties": {
+                "source": {
+                  "properties": {
+                    "name": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "id": {
+                      "type": "long"
+                    },
+                    "version": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "hostname": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    }
+                  }
                 }
               }
             }

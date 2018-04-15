@@ -8,12 +8,7 @@ source ./env.sh
 popd > /dev/null
 
 function dns_enable () {
-    start_service "dns"
     add_as_dns_to_host_dnsmasq ${DOMAIN_NAME} "dns" 53
-}
-
-function start_service () {
-    docker_compose_in_environment up -d $1
 }
 
 function add_as_dns_to_host_dnsmasq () {

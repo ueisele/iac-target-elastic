@@ -7,6 +7,8 @@ source ./docker-compose.sh
 popd > /dev/null
 
 function main () {
+    start_service "dns"
+    
     start_service "elasticsearch"
     start_service "kibana"
 }

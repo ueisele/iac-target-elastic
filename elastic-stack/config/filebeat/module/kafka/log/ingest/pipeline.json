@@ -11,6 +11,13 @@
       }
     },
     {
+      "script": {
+        "lang": "painless",
+        "inline": "ctx._id = ctx.beat.hostname + '#' + ctx.kafka.log.timestamp + '#' + ctx.offset + '#' + ctx.kafka.log.class"
+      }
+    },
+    {"remove": {"field": "message" }},
+    {
       "grok": {
         "field": "kafka.log.message",
         "patterns": [
@@ -59,7 +66,7 @@
   ],
   "on_failure" : [{
     "set" : {
-      "field" : "error.log",
+      "field" : "error",
       "value" : "{{ _ingest.on_failure_message }}"
     }
   }]

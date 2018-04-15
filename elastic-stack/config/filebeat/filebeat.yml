@@ -6,23 +6,20 @@ filebeat.modules:
     #var.paths:
     prospector:
     - document_type: log
-      scan_frequency: 5s
+      scan_frequency: 2s
       close_removed: true
-      close_inactive: 5m
-
-  requestlog:
-    enabled: true
-    var.kafka_home: /opt/kafka
-    #var.paths:
-    prospector:
-    - document_type: log
-      scan_frequency: 5s
-      close_removed: true
-      close_inactive: 5m      
+      close_inactive: 0
+      max_bytes: 20971520
+      fields:
+        meta.log.source.name: kafka
+        meta.log.source.id: 1
+        meta.log.source.version: "0.11.0.2"
+      fields_under_root: true
 
 #name: filebeat
 fields:
-  env: iac-target-elastic
+  meta.env.name: iac-target-elastic
+  meta.log.source.hostname: "%{[beat.hostname]}"
 fields_under_root: true
 
 processors:
@@ -30,12 +27,19 @@ processors:
 
 output.elasticsearch:
   hosts: ['elasticsearch:9200']
-  index: "filebeat-%{[env]}-%{[fileset.module]}-%{[fileset.name]}-%{+yyyy.MM.dd}"
+  index: "filebeat-%{[meta.env.name]}-%{[fileset.module]}-%{[fileset.name]}-%{+yyyy.MM.dd}"
+  #index: "filebeat-kafka-%{+yyyy.MM.dd}"
+  #indices:
+  #  - index: "filebeat-%{[env]}-kafka-requestlog-%{+yyyy.MM.dd}"
+  #    when.equals:
+  #      kafka.log.class: "kafka.request.logger"
   template.name: "filebeat"
   template.path: "filebeat.template.json"
   template.overwrite: true
   template.versions.2x.path: "filebeat.template-es2x.json"
   template.versions.6x.path: "filebeat.template-es6x.json"
-  worker: 2
+  worker: 8
+  compression_level: 1
+  max_retries: 10
   username: elastic
   password: changeme
