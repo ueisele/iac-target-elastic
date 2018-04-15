@@ -13,7 +13,7 @@
     {
       "script": {
         "lang": "painless",
-        "inline": "ctx._id = ctx.beat.hostname + '#' + ctx.kafka.log.timestamp + '#' + ctx.offset + '#' + ctx.kafka.log.class"
+        "inline": "ctx._id = ctx.beat.hostname + '#' + ctx.kafka.log.timestamp + '#' + ctx.offset + '#' + ctx.kafka.log.class + '#' + ctx.message.hashCode()"
       }
     },
     {"remove": {"field": "message" }},
@@ -21,7 +21,7 @@
       "grok": {
         "field": "kafka.log.message",
         "patterns": [
-          "\\[%{DATA:kafka.log.component}\\][,:. ] +%{JAVALOGMESSAGE:kafka.log.message}"
+          "\\[%{DATA:kafka.log.component}\\][,:. ] *%{JAVALOGMESSAGE:kafka.log.message}"
         ],
         "on_failure": [
           {
