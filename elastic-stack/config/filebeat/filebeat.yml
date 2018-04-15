@@ -5,22 +5,25 @@ filebeat.modules:
     var.kafka_home: /opt/kafka
     #var.paths:
     prospector:
-    - input_type: log
       scan_frequency: 2s
       close_removed: true
-      close_inactive: 1m
+      close_inactive: 2m
       ignore_older: 0
       max_bytes: 20971520
       fields:
-        meta.log.source.name: kafka
-        meta.log.source.id: 1
-        meta.log.source.version: "0.11.0.2"
+        log.source.name: kafka
+        log.source.id: 1
+        log.source.version: "0.11.0.2"
+        log.source.type: infra
       fields_under_root: true
 
 #name: filebeat
 fields:
   meta.env.name: iac-target-elastic
-  meta.log.source.hostname: "iac-target-elastic-kafka01"
+  meta.env.stage: dev
+  meta.host.name: iac-target-elastic-kafka01
+  meta.host.group: kafka
+  meta.host.number: 1
 fields_under_root: true
 
 processors:
@@ -31,11 +34,14 @@ output.elasticsearch:
   index: "filebeat-%{[meta.env.name]}-%{[fileset.module]}-%{[fileset.name]}-default-%{+yyyy.MM.dd}"
   indices:
     - index: "filebeat-%{[meta.env.name]}-%{[fileset.module]}-%{[fileset.name]}-large-%{+yyyy.MM.dd}"
-      when.contains:
-        message: "(kafka.request.logger)"
-    - index: "filebeat-%{[meta.env.name]}-%{[fileset.module]}-%{[fileset.name]}-large-%{+yyyy.MM.dd}"
-      when.regexp:
-        message: "TRACE.*\\(kafka.server.KafkaApis\\)$"        
+      when.or:
+        - contains:
+            message: "(kafka.request.logger)"
+        - and:
+            - contains:
+                message: "(kafka.server.KafkaApis)"
+            - contains:
+                message: "TRACE"                  
   template.name: "filebeat"
   template.path: "filebeat.template.json"
   template.overwrite: true
