@@ -1,0 +1,104 @@
+{
+  "description": "Pipeline for parsing Kafka request logger messages",
+  "processors": [
+    {
+      "grok": {
+        "field": "message",
+        "trace_match": true,
+        "patterns": [
+          "(?m)%{TIMESTAMP_ISO8601:kafka.requestlog.timestamp}. %{LOGLEVEL} +%{JAVALOGMESSAGE:kafka.requestlog.message} \\(kafka\\.request\\.logger\\)$"
+        ]
+      }
+    },
+    {"remove": {"field": "message" }},
+    {
+      "grok": {
+        "field": "kafka.requestlog.message",
+        "patterns": [
+          "^Completed request:%{DATA:kafka.requestlog.request.raw}(,response:%{DATA:kafka.requestlog.response.raw})? from connection %{DATA:kafka.requestlog.connection.raw};totalTime:%{NUMBER:kafka.requestlog.metric.totalTime},requestQueueTime:%{NUMBER:kafka.requestlog.metric.requestQueueTime},localTime:%{NUMBER:kafka.requestlog.metric.localTime},remoteTime:%{NUMBER:kafka.requestlog.metric.remoteTime},throttleTime:%{NUMBER:kafka.requestlog.metric.throttleTime},responseQueueTime:%{NUMBER:kafka.requestlog.metric.responseQueueTime},sendTime:%{NUMBER:kafka.requestlog.metric.sendTime},securityProtocol:%{DATA:kafka.requestlog.securityProtocol},principal:%{DATA:kafka.requestlog.principal},listener:%{DATA:kafka.requestlog.listener}(,temporaryMemoryBytes:%{NUMBER:kafka.requestlog.metric.temporaryMemoryBytes})?(,messageConversionsTime:%{NUMBER:kafka.requestlog.metric.messageConversionsTime})?$"
+        ]
+      }
+    },
+    {"remove": {"field": "kafka.requestlog.message" }},
+    {
+      "grok": {
+        "field": "kafka.requestlog.request.raw",
+        "patterns": [
+          "^\\{api_key=%{NUMBER:kafka.requestlog.request.header.apiKey},api_version=%{NUMBER:kafka.requestlog.request.header.apiVersion},correlation_id=%{NUMBER:kafka.requestlog.request.header.correlationId},client_id=%{DATA:kafka.requestlog.request.header.clientId}\\} -- \\{%{DATA:kafka.requestlog.request.body.raw}\\}$"
+        ],
+        "on_failure" : [
+          {
+            "grok": {
+              "field": "kafka.requestlog.request.raw",
+              "patterns": [
+                "Name:%{SPACE}%{DATA:kafka.requestlog.request.header.name};%{SPACE}Version:%{SPACE}${NUMBER:kafka.requestlog.request.header.apiVersion};%{SPACE}CorrelationId:%{SPACE}%{NUMBER:kafka.requestlog.request.header.correlationId};%{SPACE}ClientId:%{SPACE}(Some\\()?%{DATA:kafka.requestlog.request.header.clientId}(\\))?;%{SPACE}%{DATA:kafka.requestlog.request.body.raw}"
+              ]
+            }
+          },
+          {
+            "set" : {
+              "field" : "kafka.requestlog.legacy",
+              "value" : "true"
+            }
+          }
+        ]
+      }
+    }, 
+    {"remove": {"field": "kafka.requestlog.request.raw" }},  
+    {
+      "grok": {
+        "field": "kafka.requestlog.connection.raw",
+        "patterns": [
+          "%{IP:kafka.requestlog.connection.brokerIp}:%{POSINT:kafka.requestlog.connection.brokerPort}-%{IP:kafka.requestlog.connection.clientIp}:%{POSINT:kafka.requestlog.connection.clientPort}"
+        ],
+        "on_failure" : [{
+          "set" : {
+            "field" : "kafka.requestlog.connection.unstructured",
+            "value" : "{{ kafka.requestlog.connection.raw }}"
+          }
+        }]
+      }
+    },   
+    {"remove": {"field": "kafka.requestlog.connection.raw" }},  
+    {
+      "grok": {
+        "field": "kafka.requestlog.request.body.raw",
+        "patterns": [
+          "^group_id=%{STRING_VALUE:kafka.requestlog.request.body.groupId}(,group_generation_id=%{NUMBER:kafka.requestlog.request.body.groupGenerationId})?(,generation_id=%{NUMBER:kafka.requestlog.request.body.generationId})?(,session_timeout=%{NUMBER:kafka.requestlog.request.body.sessionTimeout})?(,rebalance_timeout=%{NUMBER:kafka.requestlog.request.body.rebalanceTimeout})?(,member_id=%{STRING_VALUE:kafka.requestlog.request.body.memberId})?(,retention_time=%{NUMBER:kafka.requestlog.request.body.retentionTime})?",
+          "^replica_id=%{NUMBER:kafka.requestlog.request.body.replicaId}(,max_wait_time=%{NUMBER:kafka.requestlog.request.body.maxWaitTime})?(,min_bytes=%{NUMBER:kafka.requestlog.request.body.minBytes})?(,max_bytes=%{NUMBER:kafka.requestlog.request.body.maxBytes})?(,isolation_level=%{NUMBER:kafka.requestlog.request.body.isolationLevel})?",
+          "^coordinator_key=%{STRING_VALUE:kafka.requestlog.request.body.coordinatorKey},coordinator_type=%{NUMBER:kafka.requestlog.request.body.coordinatorType}",
+          "^broker_id=%{NUMBER:kafka.requestlog.request.body.brokerId}",
+          "^controller_id=%{NUMBER:kafka.requestlog.request.body.controllerId},controller_epoch=%{NUMBER:kafka.requestlog.request.body.controllerEpoch}(,delete_partitions=%{BOOLEAN:kafka.requestlog.request.body.deletePartitions})?",
+          "^acks=%{NUMBER:kafka.requestlog.request.body.acks},timeout=%{NUMBER:kafka.requestlog.request.body.timeout}",
+          "^transactional_id=%{STRING_VALUE:kafka.requestlog.request.body.transactionalId}(,acks=%{NUMBER:kafka.requestlog.request.body.acks})?(,timeout=%{NUMBER:kafka.requestlog.request.body.timeout})?(,transaction_timeout_ms=%{NUMBER:kafka.requestlog.request.body.transactionTimeoutMs})?(,consumer_group_id=A)?(,producer_id=1)?(,producer_epoch=1)?(,consumer_group_id=A)?(,transaction_result=true)?",
+          "^BrokerId:${SPACE}%{NUMBER:kafka.requestlog.request.body.brokerId}"
+        ],
+        "pattern_definitions" : {
+          "STRING_VALUE" : "[^, ]*?",
+          "BOOLEAN": "false|true"
+        },
+        "ignore_failure": true
+      }
+    },   
+    {
+      "rename": {
+        "field": "@timestamp",
+        "target_field": "read_timestamp"
+      }
+    },
+    {
+      "date": {
+        "field": "kafka.log.timestamp",
+        "target_field": "@timestamp",
+        "formats": ["yyyy-MM-dd HH:mm:ss,SSS"]
+      }
+    },
+    {"remove": {"field": "kafka.requestlog.timestamp" }}
+  ],
+  "on_failure" : [{
+    "set" : {
+      "field" : "error.log",
+      "value" : "{{ _ingest.on_failure_message }}"
+    }
+  }]
+}

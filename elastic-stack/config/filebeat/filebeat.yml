@@ -5,6 +5,7 @@ filebeat.modules:
     var.kafka_home: /opt/kafka
     #var.paths:
     prospector:
+      document_type: kafka_log
       scan_frequency: 2s
       close_removed: true
       close_inactive: 2m
@@ -41,7 +42,20 @@ output.elasticsearch:
             - contains:
                 message: "(kafka.server.KafkaApis)"
             - contains:
-                message: "TRACE"                  
+                message: "TRACE"
+        - and:
+            - contains:
+                message: "(kafka.network.RequestChannel$)"
+            - contains:
+                message: "TRACE"                
+        - and:
+            - contains:
+                message: "(kafka.network.Processor)"
+            - or:    
+                - contains:
+                    message: "TRACE"
+                - contains:
+                    message: "DEBUG"                                                
   template.name: "filebeat"
   template.path: "filebeat.template.json"
   template.overwrite: true
